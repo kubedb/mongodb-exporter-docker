@@ -1,7 +1,7 @@
 SHELL=/bin/bash -o pipefail
 
 REGISTRY   ?= kubedb
-BIN        := mongodb_exporter
+BIN        := percona-mongodb-exporter
 IMAGE      := $(REGISTRY)/$(BIN)
 TAG        := $(shell git describe --exact-match --abbrev=0 2>/dev/null || echo "")
 
@@ -11,8 +11,21 @@ push: container
 
 .PHONY: container
 container:
-	docker build -t $(IMAGE):$(TAG) .
+	docker build --build-arg TAG=${TAG} -t $(IMAGE):$(TAG) .
 
 .PHONY: version
 version:
 	@echo ::set-output name=version::$(TAG)
+
+.PHONY: fmt
+fmt:
+	@find . -path ./vendor -prune -o -name '*.sh' -exec shfmt -l -w -ci -i 4 {} \;
+
+.PHONY: verify
+verify: fmt
+	@if !(git diff --exit-code HEAD); then \
+		echo "files are out of date, run make fmt"; exit 1; \
+	fi
+
+.PHONY: ci
+ci: verify

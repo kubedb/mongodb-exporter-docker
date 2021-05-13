@@ -12,23 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM debian:stretch as builder
+FROM debian:stable as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN true
+
+ARG TAG
 
 RUN set -x \
   && apt-get update \
   && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl unzip
 
-RUN set -x                                                                                             \
-  && curl -fsSL -o mongodb_exporter https://github.com/dcu/mongodb_exporter/releases/download/v1.0.0/mongodb_exporter-linux-amd64 \
-  && chmod 755 mongodb_exporter
+RUN set -x \
+  && curl -fssL -o mongodb_exporter.tar.gz https://github.com/percona/mongodb_exporter/releases/download/${TAG}/mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
+  && tar -xzvf mongodb_exporter.tar.gz \
+  && chmod +x mongodb_exporter
 
-FROM alpine:3.4
+FROM alpine:latest
 
 COPY --from=builder mongodb_exporter /bin/mongodb_exporter
 
-EXPOSE 9001
+EXPOSE 9216
 
 ENTRYPOINT  [ "/bin/mongodb_exporter" ]
