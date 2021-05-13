@@ -24,8 +24,9 @@ RUN set -x \
   && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl unzip
 
 RUN set -x \
-  && curl -fssL -o mongodb_exporter.tar.gz https://github.com/percona/mongodb_exporter/releases/download/${TAG}/mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
-  && tar -xzvf mongodb_exporter.tar.gz \
+  && curl -fssL -O https://github.com/percona/mongodb_exporter/releases/download/${TAG}/mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
+  && tar -xzvf mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
+  && mv mongodb_exporter-${TAG#v}.linux-amd64/mongodb_exporter mongodb_exporter \
   && chmod +x mongodb_exporter
 
 FROM alpine:latest
