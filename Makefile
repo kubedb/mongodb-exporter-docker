@@ -5,7 +5,7 @@ BIN        := mongodb_exporter
 IMAGE      := $(REGISTRY)/$(BIN)
 TAG        ?= $(shell git describe --exact-match --abbrev=0 2>/dev/null || echo "")
 
-DOCKER_PLATFORMS := linux/amd64
+DOCKER_PLATFORMS := linux/amd64 linux/arm64
 PLATFORM         ?= linux/$(subst x86_64,amd64,$(subst aarch64,arm64,$(shell uname -m)))
 VERSION          = $(TAG)_$(subst /,_,$(PLATFORM))
 
@@ -26,7 +26,7 @@ all-push: $(addprefix push-, $(subst /,_,$(DOCKER_PLATFORMS)))
 .PHONY: container
 container:
 	@echo "container: $(IMAGE):$(VERSION)"
-	@docker buildx build --build-arg TAG=${TAG} --platform $(PLATFORM) --load --pull -t $(IMAGE):$(VERSION) -f Dockerfile .
+	@docker buildx build --build-arg="TAG=${TAG}" --platform $(PLATFORM) --load --pull -t $(IMAGE):$(VERSION) -f Dockerfile .
 	@echo
 
 push: container

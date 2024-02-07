@@ -17,6 +17,8 @@ FROM debian:stable as builder
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN true
 
+ARG TARGETOS
+ARG TARGETARCH
 ARG TAG
 
 RUN set -x \
@@ -24,12 +26,12 @@ RUN set -x \
   && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl unzip
 
 RUN set -x \
-  && curl -fssL -O https://github.com/percona/mongodb_exporter/releases/download/${TAG}/mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
-  && tar -xzvf mongodb_exporter-${TAG#v}.linux-amd64.tar.gz \
-  && mv mongodb_exporter-${TAG#v}.linux-amd64/mongodb_exporter mongodb_exporter \
+  && curl -fssL -O https://github.com/percona/mongodb_exporter/releases/download/${TAG}/mongodb_exporter-${TAG#v}.$TARGETOS-$TARGETARCH.tar.gz \
+  && tar -xzvf mongodb_exporter-${TAG#v}.$TARGETOS-$TARGETARCH.tar.gz \
+  && mv mongodb_exporter-${TAG#v}.$TARGETOS-$TARGETARCH/mongodb_exporter mongodb_exporter \
   && chmod +x mongodb_exporter
 
-FROM alpine:latest
+FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder mongodb_exporter /bin/mongodb_exporter
 
